@@ -12,7 +12,7 @@ fn main() {
             Arg::new("all")
                 .short('a')
                 .takes_value(false)
-                .help("List all files in the current directory, including hidden files]"),
+                .help("List all files in the current directory, including hidden files"),
         )
         .arg(
             Arg::new("Trailing")
@@ -42,7 +42,7 @@ fn main() {
 
     // Set up the directory path expansion
     let dir_name = matches.value_of("dir").unwrap_or("");
-    println!("Dir name: {:?}", dir_name);
+    // println!("Dir name: {:?}", dir_name);
     let expanded_dir_name = shellexpand::tilde(dir_name).to_string();
     let expanded_dir_path = Path::new(&expanded_dir_name);
 
@@ -61,9 +61,14 @@ fn main() {
     // Iterate through the files to print out their names
     for f in &file_vec {
         let entry_path = f.path();
-        if entry_path.is_dir() {
-            print! {"DIR: "}
+        let file_name_str = entry_path.file_name().unwrap_or_default().to_string_lossy();
+        // Only display non-hidden files unless the -a flag is on
+        if matches.is_present("all") || !file_name_str.starts_with('.') {
+            if entry_path.is_dir() {
+                println! {"\x1b[93m{}\x1b[0m", file_name_str};
+            } else {
+                println!("{}", file_name_str);
+            }
         }
-        println!("{:?}", entry_path.file_name());
     }
 }
