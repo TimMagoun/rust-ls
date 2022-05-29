@@ -1,6 +1,9 @@
+use chrono::{DateTime, Local};
 use clap::{Arg, Command};
 use std::fs::{self, DirEntry};
+use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
+use std::time::SystemTime;
 
 fn main() {
     // Set up the command line parser
@@ -15,7 +18,7 @@ fn main() {
                 .help("List all files in the current directory, including hidden files"),
         )
         .arg(
-            Arg::new("Trailing")
+            Arg::new("trail")
                 .short('F')
                 .takes_value(false)
                 .help("List files with trailing / added to directory names"),
@@ -60,14 +63,44 @@ fn main() {
 
     // Iterate through the files to print out their names
     for f in &file_vec {
-        let entry_path = f.path();
+        let entry_path = &f.path();
         let file_name_str = entry_path.file_name().unwrap_or_default().to_string_lossy();
         // Only display non-hidden files unless the -a flag is on
         if matches.is_present("all") || !file_name_str.starts_with('.') {
-            if entry_path.is_dir() {
-                println! {"\x1b[93m{}\x1b[0m", file_name_str};
-            } else {
-                println!("{}", file_name_str);
+            // If it's in the long format, print additional information
+            if let Ok(meta) = std::fs::metadata(entry_path) {
+                if matches.is_present("long") {
+                    let file_len = meta.len();
+                    let uid = meta.uid(); // Specific for unix systems (ex. Mac)
+                    let gid = meta.gid();
+                    let read_only = meta.permissions().readonly();
+                    let last_modified = meta.modified().unwrap_or_else(|_| SystemTime::now()); // Maybe throw something if they can't access the modified time?
+                    let datetime: DateTime<Local> = last_modified.into();
+
+                    print!(
+                        "{}\t{}\t{}\t{}B\t{}\t",
+                        if read_only { "r" } else { "rw" },
+                        &uid,
+                        &gid,
+                        &file_len,
+                        &datetime.format("%b %d %k:%M")
+                    );
+                }
+
+                if meta.is_dir() {
+                    print! {"\x1b[93m{}\x1b[0m", file_name_str};
+                    // Handles trailing slashes for directories
+                    if matches.is_present("trail") {
+                        print!("/")
+                    }
+                    println!();
+                } else if meta.is_file() {
+                    println!("{}", file_name_str);
+                } else if meta.is_symlink() {
+                    println!("\x1b[35m{}\x1b[0m", file_name_str);
+                } else {
+                    println!("Unknown type");
+                }
             }
         }
     }
