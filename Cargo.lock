@@ -165,16 +165,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
-name = "matician"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "glob",
- "shellexpand",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -259,6 +249,16 @@ dependencies = [
  "getrandom",
  "redox_syscall",
  "thiserror",
+]
+
+[[package]]
+name = "rust-ls"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "glob",
+ "shellexpand",
 ]
 
 [[package]]
