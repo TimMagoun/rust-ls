@@ -4,7 +4,11 @@ A simple clone of the list function on linux/unix systems
 
 features include: different colors for directories, tilde expansion, and help menu
 
-## Usage: [command] [flags] [directory]
+## Build
+
+run `cargo build -r` in the source directory
+
+## Usage: matician [flags] [directory]
 
 Supported flags:
 - -a list all files, including hidden ones (files and directories that start with a period)
@@ -13,4 +17,4 @@ Supported flags:
 - -h display the help page
 - -v display version
 
-Example: list all files with trailing slashes in the home directory `[command] -aF ~`
+Example: list all files with trailing slashes in the home directory `matician -aF ~`
